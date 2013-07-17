@@ -86,7 +86,7 @@ public class FeedActivity extends Activity {
 					editor.putString("actual_feed", cursor.getString(cursor.getColumnIndex("url")));
 					// Commit the edits!
 					editor.commit();
-					// sacar:
+					// Reemplazar lo siguiente por un SlidingView:
 					Intent intent = new Intent(_context, MainActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(intent);
