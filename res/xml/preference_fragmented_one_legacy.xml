@@ -1,0 +1,12 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="dialog_based_preferences" >
+        <EditTextPreference
+            android:dialogTitle="url"
+            android:key="url_server"
+            android:summary="@string/prefs_summ_category_one"
+            android:title="@string/prefs_category_one"
+            android:defaultValue="@string/default_url_server" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

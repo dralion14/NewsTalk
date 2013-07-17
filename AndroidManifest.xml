@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cl.newstalk"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppBaseTheme" >
+        <activity
+            android:name="cl.newstalk.MainActivity"
+            android:label="@string/app_name"
+            android:uiOptions="none" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="cl.newstalk.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+        <activity
+            android:name="cl.newstalk.RegisterActivity"
+            android:label="@string/title_activity_register"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+        <activity
+            android:name="cl.newstalk.SettingsActivity"
+            android:label="Configuracion"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+
+        <meta-data
+            android:name="ispeech_api_key"
+            android:value="fd6a716e5a72f4e978aad6ce2f8fe40a" />
+        <meta-data
+            android:name="debug"
+            android:value="false" />
+
+        <activity
+            android:name="cl.newstalk.SourcesActivity"
+            android:label="@string/title_activity_sources" >
+        </activity>
+        <activity
+            android:name="cl.newstalk.SourceActivity"
+            android:label="@string/title_activity_source" >
+        </activity>
+        <activity
+            android:name="cl.newstalk.SettingsActivity2"
+            android:label="@string/title_activity_settings_activity2" >
+        </activity>
+        <activity
+            android:name="cl.newstalk.FeedActivity"
+            android:label="@string/title_activity_feed" >
+        </activity>
+    </application>
+
+</manifest>
