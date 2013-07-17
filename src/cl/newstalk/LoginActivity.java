@@ -17,11 +17,9 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -85,12 +83,11 @@ public class LoginActivity extends Activity {
 		mEmailView = (EditText) findViewById(R.id.email);
 
 		mPasswordView = (EditText) findViewById(R.id.password);
-		mPasswordView
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		mPasswordView.setOnEditorActionListener(
+				new TextView.OnEditorActionListener() {
 
 					@Override
-					public boolean onEditorAction(TextView textView, int id,
-							KeyEvent keyEvent) {
+					public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
 						if (id == R.id.login || id == EditorInfo.IME_NULL) {
 							attemptLogin();
 							return true;
@@ -124,13 +121,11 @@ public class LoginActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.action_settings:
-				Intent preference = new Intent(getApplicationContext(),
-						SettingsActivity.class);
+				Intent preference = new Intent(getApplicationContext(), SettingsActivity.class);
 				// preference .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(preference);
-				// Closing main screen
+				// Closing login screen
 				// finish();
-
 				return true;
 			default:
 				return false;
@@ -179,26 +174,24 @@ public class LoginActivity extends Activity {
 			focusView = mEmailView;
 			cancel = true;
 		}
-		cancel = false;
+
 		if (cancel) {
 			// There was an error; don't attempt login and focus the first
 			// form field with an error.
 			focusView.requestFocus();
 		} else {
-			ConnectionDetector cd = new ConnectionDetector(
-					getApplicationContext());
+			ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
 			if (cd.isConnectingToInternet()) {
 				// Show a progress spinner, and kick off a background task to
 				// perform the user login attempt.
-				mLoginStatusMessageView
-						.setText(R.string.login_progress_signing_in);
+				mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 				showProgress(true);
 				mAuthTask = new UserLoginTask();
-				mAuthTask.execute("dralion@newstalk.cl", "dralion");
-				// mAuthTask.execute(mEmail, mPassword);
+				mAuthTask.execute(mEmail, mPassword);
 			} else {
 				Log.e(MainActivity.TAG, "No hay conexion");
-				showDialog(R.string.network_error, R.string.network_error_msg);
+				Toast.makeText(getApplicationContext(), R.string.network_error, Toast.LENGTH_LONG).show();
+				// showDialog(R.string.network_error, R.string.network_error_msg);
 			}
 		}
 	}
@@ -212,8 +205,7 @@ public class LoginActivity extends Activity {
 		// for very easy animations. If available, use these APIs to fade-in
 		// the progress spinner.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			int shortAnimTime = getResources().getInteger(
-					android.R.integer.config_shortAnimTime);
+			int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
 			mLoginStatusView.setVisibility(View.VISIBLE);
 			mLoginStatusView.animate().setDuration(shortAnimTime)
@@ -222,8 +214,7 @@ public class LoginActivity extends Activity {
 
 						@Override
 						public void onAnimationEnd(Animator animation) {
-							mLoginStatusView.setVisibility(show ? View.VISIBLE
-									: View.GONE);
+							mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
 						}
 					});
 
@@ -234,8 +225,7 @@ public class LoginActivity extends Activity {
 
 						@Override
 						public void onAnimationEnd(Animator animation) {
-							mLoginFormView.setVisibility(show ? View.GONE
-									: View.VISIBLE);
+							mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
 						}
 					});
 		} else {
@@ -258,22 +248,15 @@ public class LoginActivity extends Activity {
 			JSONObject json = null;
 
 			// Verify network access.
-			ConnectionDetector cd = new ConnectionDetector(
-					getApplicationContext());
+			ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
 			if (cd.isConnectingToInternet()) {
-				SharedPreferences sharedPref = PreferenceManager
-						.getDefaultSharedPreferences(getApplicationContext());
-
-				String url = sharedPref.getString(
-						SettingsActivity.KEY_URL_SERVER, "192.168.0.106");
-
 				UserFunctions userFunction = new UserFunctions();
 
-				json = userFunction.loginUser(params[0], params[1], url);
-
+				json = userFunction.loginUser(params[0], params[1]);
 			} else {
 				Log.e(MainActivity.TAG, "No hay conexion");
-				showDialog(R.string.network_error, R.string.network_error_msg);
+				Toast.makeText(getApplicationContext(), R.string.network_error, Toast.LENGTH_LONG).show();
+				// showDialog(R.string.network_error, R.string.network_error_msg);
 			}
 
 			return json;
@@ -286,7 +269,6 @@ public class LoginActivity extends Activity {
 
 			if (json != null) {
 				// Log.d(MainActivity.TAG, json.toString());
-
 				int success, i, total;
 				UserFunctions userFunction = new UserFunctions();
 
@@ -294,19 +276,17 @@ public class LoginActivity extends Activity {
 					success = json.getInt(KEY_RETURN);
 
 					if (success == 0) {
+						// Login correcto
 						// Clear all previous data in database
-						DatabaseHandler db = new DatabaseHandler(
-								getApplicationContext());
-						JSONObject json_aux;
-
-						json_aux = json.getJSONObject("user");
+						DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+						JSONObject json_aux = json.getJSONObject("user");
 
 						userFunction.logoutUser(getApplicationContext());
+
 						db.addUser(json_aux.getString(KEY_NAME),
 								json_aux.getString(KEY_EMAIL),
 								json_aux.getString(KEY_UID),
 								json_aux.getString(KEY_CREATED_AT));
-						// Log.w(MainActivity.TAG, "Add user");
 
 						JSONArray json_sources = json.getJSONArray("sources");
 						total = json_sources.length();
@@ -316,7 +296,7 @@ public class LoginActivity extends Activity {
 									json_aux.getString(KEY_NAME),
 									json_aux.getString(KEY_URL));
 						}
-						// Log.w(MainActivity.TAG,""+db.getRowSource());
+
 						JSONArray json_feeds = json.getJSONArray("feeds");
 						total = json_feeds.length();
 						for (i = 0; i < total; i++) {
@@ -326,35 +306,33 @@ public class LoginActivity extends Activity {
 									json_aux.getString(KEY_NAME),
 									json_aux.getString(KEY_URL));
 						}
-						// Log.w(MainActivity.TAG,""+db.getRowFeed());
-						JSONArray json_feeds_active = json
-								.getJSONArray("feed_user");
+
+						JSONArray json_feeds_active = json.getJSONArray("feed_user");
 						total = json_feeds_active.length();
 						for (i = 0; i < total; i++) {
 							json_aux = (JSONObject) json_sources.get(i);
 							db.activeFeed(json_aux.getInt(KEY_ID));
 						}
-						// Log.w(MainActivity.TAG,""+db.getRowFeedActive());
-						// Log.i("NewsTalk", "Datos cargados");
 
 						// Launch Main Screen
-						Intent main = new Intent(getApplicationContext(),
-								MainActivity.class);
+						Intent main = new Intent(getApplicationContext(), MainActivity.class);
+						main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(main);
 						finish();
 
 					} else if (success == 1) {
+						// Email no registrado
 						// Launch Register Screen
-						Intent register = new Intent(getApplicationContext(),
-								RegisterActivity.class);
+						Intent register = new Intent(getApplicationContext(), RegisterActivity.class);
 						register.putExtra(KEY_EMAIL, mEmail);
 						register.putExtra(KEY_PASSWORD, mPassword);
+						register.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(register);
 						finish();
 
 					} else if (success == 2) {
-						mPasswordView
-								.setError(getString(R.string.error_incorrect_password));
+						// Password incorrecto
+						mPasswordView.setError(getString(R.string.error_incorrect_password));
 						mPasswordView.requestFocus();
 					}
 				} catch (JSONException e) {
@@ -363,8 +341,7 @@ public class LoginActivity extends Activity {
 					Log.e(MainActivity.TAG, "Error");
 				}
 			} else {
-				Toast.makeText(getApplicationContext(), R.string.network_error,
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), R.string.network_error, Toast.LENGTH_LONG).show();
 				// showDialog(R.string.network_error, R.string.json_error_msg);
 			}
 		}
@@ -378,8 +355,7 @@ public class LoginActivity extends Activity {
 
 	// BEGIN_INCLUDE(activity)
 	void showDialog(int title, int msg) {
-		DialogFragment newFragment = FragmentAlertDialog
-				.newInstance(title, msg);
+		DialogFragment newFragment = FragmentAlertDialog.newInstance(title, msg);
 		newFragment.show(getFragmentManager(), "dialog");
 	}
 

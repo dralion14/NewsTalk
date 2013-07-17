@@ -61,6 +61,17 @@
                 android:maxLines="1"
                 android:singleLine="true" />
 
+            <TextView
+                android:id="@+id/forgot_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:clickable="true"
+                android:gravity="right"
+                android:linksClickable="true"
+                android:text="@string/forgot_password"
+                android:textColor="#10bcc9" />
+
             <Button
                 android:id="@+id/sign_in_button"
                 android:layout_width="wrap_content"

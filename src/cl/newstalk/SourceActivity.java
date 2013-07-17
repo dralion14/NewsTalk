@@ -2,7 +2,6 @@ package cl.newstalk;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
@@ -17,7 +16,6 @@ import cl.newstalk.library.ListViewAdapter;
 public class SourceActivity extends Activity {
 
 	private ListView listSources;
-	private Context _context;
 	private DatabaseHandler db;
 	private ListViewAdapter cursorAdapter;
 
@@ -25,8 +23,6 @@ public class SourceActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_source);
-
-		_context = this.getApplicationContext();
 
 		listSources = (ListView) findViewById(R.id.listSources);
 
@@ -62,21 +58,19 @@ public class SourceActivity extends Activity {
 
 			int[] to = new int[] { R.id.source_name };
 
-			cursorAdapter = new ListViewAdapter(this,
-					R.layout.row_list_sources, cursor, from, to);
+			cursorAdapter = new ListViewAdapter(this, R.layout.row_list_sources, cursor, from, to);
 
 			listSources.setAdapter(cursorAdapter);
 
 		} catch (Exception e) {
-			Log.d(MainActivity.TAG, "El mensaje de error es: " + e.getMessage());
+			Log.e(MainActivity.TAG, "El mensaje de error es: " + e.getMessage());
 		} finally {
 			db.close();
 		}
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		getSources();
 	}
@@ -92,9 +86,10 @@ public class SourceActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				Intent intent = new Intent(this, MainActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				Intent main = new Intent(getApplicationContext(), MainActivity.class);
+				// main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(main);
+				finish();
 				return true;
 			default:
 				return false;

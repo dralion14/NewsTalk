@@ -38,8 +38,7 @@ public class UserFunctions {
 	 * @param email
 	 * @param password
 	 * */
-	public JSONObject loginUser(String email, String password, String url) {
-		String serverURL = "http://" + url + baseURL;
+	public JSONObject loginUser(String email, String password) {
 		// Building Parameters
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("tag", login_tag));
@@ -59,8 +58,7 @@ public class UserFunctions {
 	 * @param email
 	 * @param password
 	 * */
-	public JSONObject registerUser(String name, String email, String password, String url) {
-		String serverURL = "http://" + url + baseURL;
+	public JSONObject registerUser(String name, String email, String password) {
 		// Building Parameters
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("tag", register_tag));
@@ -69,7 +67,7 @@ public class UserFunctions {
 		params.add(new BasicNameValuePair("password", password));
 
 		// getting JSON Object
-		JSONObject json = jsonParser.getJSONFromUrl(serverURL, params);
+		JSONObject json = jsonParser.getJSONFromUrl(baseURL, params);
 
 		return json;
 	}

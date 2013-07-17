@@ -6,7 +6,6 @@
     <string name="action_feeds">Canales RSS</string>
     <string name="action_settings">Configuración</string>
     <string name="action_logout">Cerrar Sesión</string>
-    <string name="hello">Hola, Facebook o Twitter. Bienvenido</string>
     <string name="main_progress">Cargando&#8230;</string>
     <string name="network_error">Error conexión</string>
     <string name="network_error_msg">No hay conexión a internet</string>
@@ -17,10 +16,8 @@
     <string name="prefs_summ_category_one">Url del servidor</string>
     <string name="prefs_category_two">Idioma</string>
     <string name="prefs_summ_category_two">Idioma de la aplicación</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_sources">SourcesActivity</string>
-    <string name="title_activity_source">SourceActivity</string>
-    <string name="title_activity_feed">FeedActivity</string>    
+    <string name="title_activity_source">Fuentes</string>
+    <string name="title_activity_feed">Canales RSS</string>    
     
     <string name="default_url_server">192.168.0.106</string>
     <string name="actual_feed"></string>
@@ -28,7 +25,7 @@
     
     <string-array name="activities_array">
         <item>Fuentes</item>
-        <item>Canales</item>
+        <item>Canales RSS</item>
         <item>Cuenta</item>
         <item>Salir</item>
     </string-array>

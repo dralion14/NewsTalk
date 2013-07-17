@@ -2,7 +2,6 @@ package cl.newstalk;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -23,7 +22,6 @@ import cl.newstalk.library.ListViewAdapter;
 public class FeedActivity extends Activity {
 
 	private ListView listFeeds;
-	private Context _context;
 	private DatabaseHandler db;
 	private ListViewAdapter cursorAdapter;
 
@@ -31,8 +29,6 @@ public class FeedActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_feed);
-
-		_context = this.getApplicationContext();
 
 		listFeeds = (ListView) findViewById(R.id.listFeeds);
 
@@ -80,16 +76,15 @@ public class FeedActivity extends Activity {
 					// Do something when a list item is clicked
 					SQLiteCursor cursor = (SQLiteCursor) l.getItemAtPosition(position);
 
-					SharedPreferences settings = PreferenceManager
-							.getDefaultSharedPreferences(getApplicationContext());
+					SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 					SharedPreferences.Editor editor = settings.edit();
 					editor.putString("actual_feed", cursor.getString(cursor.getColumnIndex("url")));
 					// Commit the edits!
 					editor.commit();
 					// Reemplazar lo siguiente por un SlidingView:
-					Intent intent = new Intent(_context, MainActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
+					Intent main = new Intent(getApplicationContext(), MainActivity.class);
+					main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(main);
 					finish();
 				}
 			});
@@ -102,8 +97,7 @@ public class FeedActivity extends Activity {
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode,Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		getFeeds();
 	}
@@ -119,9 +113,9 @@ public class FeedActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case android.R.id.home:
-				Intent intent = new Intent(this, MainActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
+				Intent main = new Intent(getApplicationContext(), MainActivity.class);
+				main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(main);
 				finish();
 				return true;
 			default:

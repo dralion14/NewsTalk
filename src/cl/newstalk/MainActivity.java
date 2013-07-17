@@ -9,13 +9,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
@@ -27,13 +25,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.Toast;
 import cl.newstalk.library.NewsAdapter;
 import cl.newstalk.library.UserFunctions;
 import cl.newstalk.library.XMLParser;
 
-public class MainActivity extends Activity implements
-		TextToSpeech.OnInitListener {
+public class MainActivity extends Activity implements TextToSpeech.OnInitListener {
 
 	public static final String TAG = "NewsTalk";
 	UserFunctions userFunctions;
@@ -69,12 +65,6 @@ public class MainActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		_context = this.getApplicationContext();
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-
-			ActionBar ab = getActionBar();
-			ab.setDisplayHomeAsUpEnabled(true);
-		}
-
 		/**
 		 * Main Screen for the application
 		 * */
@@ -85,8 +75,7 @@ public class MainActivity extends Activity implements
 			setContentView(R.layout.activity_main);
 
 			mTask = new MainTask(_context, this);
-			mTask.execute(userFunctions.getUserLoggedIn(
-					getApplicationContext(), KEY_UID));
+			mTask.execute(userFunctions.getUserLoggedIn(getApplicationContext(), KEY_UID));
 
 			// IVONA
 			tts = new TextToSpeech(this, this);
@@ -107,8 +96,7 @@ public class MainActivity extends Activity implements
 
 		} else {
 			// user is not logged in show login screen
-			Intent login = new Intent(getApplicationContext(),
-					LoginActivity.class);
+			Intent login = new Intent(getApplicationContext(), LoginActivity.class);
 			login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(login);
 			// Closing main screen
@@ -129,8 +117,7 @@ public class MainActivity extends Activity implements
 		switch (item.getItemId()) {
 			case R.id.action_logout:
 				userFunctions.logoutUser(getApplicationContext());
-				Intent login = new Intent(getApplicationContext(),
-						LoginActivity.class);
+				Intent login = new Intent(getApplicationContext(), LoginActivity.class);
 				login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(login);
 				// Closing main screen
@@ -138,8 +125,7 @@ public class MainActivity extends Activity implements
 
 				return true;
 			case R.id.action_settings:
-				Intent preference = new Intent(getApplicationContext(),
-						SettingsActivity.class);
+				Intent preference = new Intent(getApplicationContext(), SettingsActivity.class);
 				// preference .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(preference);
 				// Closing main screen
@@ -147,8 +133,7 @@ public class MainActivity extends Activity implements
 
 				return true;
 			case R.id.action_feeds:
-				Intent feeds = new Intent(getApplicationContext(),
-						FeedActivity.class);
+				Intent feeds = new Intent(getApplicationContext(), FeedActivity.class);
 				// preference .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(feeds);
 				// Closing main screen
@@ -156,17 +141,12 @@ public class MainActivity extends Activity implements
 
 				return true;
 			case R.id.action_sources:
-				Intent sources = new Intent(getApplicationContext(),
-						SourceActivity.class);
+				Intent sources = new Intent(getApplicationContext(), SourceActivity.class);
 				// preference .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(sources);
 				// Closing main screen
 				// finish();
 
-				return true;
-			case android.R.id.home:
-				Toast.makeText(getApplicationContext(), "HOME", Toast.LENGTH_SHORT)
-						.show();
 				return true;
 			default:
 				return false;
@@ -238,8 +218,7 @@ public class MainActivity extends Activity implements
 		if (status == TextToSpeech.SUCCESS) {
 			int result = tts.setLanguage(new Locale("spa", "usa", "penelope"));
 
-			if (result == TextToSpeech.LANG_MISSING_DATA
-					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
+			if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
 				Log.e(TAG, "This Language is not supported");
 			} else {
 				// btnSpeak.setEnabled(true);
@@ -258,11 +237,8 @@ public class MainActivity extends Activity implements
 			speaking = title;
 			tts.speak(title, TextToSpeech.QUEUE_FLUSH, null);
 
-			SharedPreferences sharedPref = PreferenceManager
-					.getDefaultSharedPreferences(getApplicationContext());
-
-			boolean url = sharedPref.getBoolean("speak_description", false);
-			if (url) {
+			if (PreferenceManager.getDefaultSharedPreferences(getApplicationContext())
+					.getBoolean("speak_description", false)) {
 				while (tts.isSpeaking())
 					;
 				tts.speak(description, TextToSpeech.QUEUE_FLUSH, null);
@@ -278,11 +254,9 @@ public class MainActivity extends Activity implements
 	 */
 	private class MainTask extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
 
-		Context context;
 		Activity main;
 
 		public MainTask(Context context, Activity main) {
-			this.context = context;
 			this.main = main;
 		}
 
@@ -292,8 +266,7 @@ public class MainActivity extends Activity implements
 			ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 
 			XMLParser parser = new XMLParser();
-			SharedPreferences sharedPref = PreferenceManager
-					.getDefaultSharedPreferences(getApplicationContext());
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 			String url = sharedPref.getString("actual_feed", "http://192.168.0.106/newstalk/rss.xml");
 			String xml = parser.getXmlFromUrl(url); // getting XML from URL
@@ -350,10 +323,8 @@ public class MainActivity extends Activity implements
 			list.setOnItemClickListener(new OnItemClickListener() {
 
 				@Override
-				public void onItemClick(AdapterView<?> parent, View view,
-						int position, long id) {
+				public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
 					HashMap<String, String> aa = (HashMap<String, String>) list.getAdapter().getItem(position);
-					Log.d(TAG, aa.get("description"));
 
 					speakOut(aa.get("title"), aa.get("description"));
 				}

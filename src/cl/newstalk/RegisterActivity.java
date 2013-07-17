@@ -1,19 +1,17 @@
 package cl.newstalk;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import cl.newstalk.library.UserFunctions;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -22,21 +20,32 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+import cl.newstalk.library.ConnectionDetector;
+import cl.newstalk.library.DatabaseHandler;
+import cl.newstalk.library.UserFunctions;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
  * well.
  */
 public class RegisterActivity extends Activity {
+
 	/**
 	 * A dummy authentication store containing known user names and passwords.
 	 * TODO: remove after connecting to a real authentication system.
 	 */
 	// JSON Response node names
+
 	private static String KEY_RETURN = "return";
+	private static String KEY_UID = "uid";
 	private static String KEY_NAME = "name";
 	private static String KEY_EMAIL = "email";
 	private static String KEY_PASSWORD = "password";
+	private static String KEY_CREATED_AT = "created_at";
+	private static String KEY_ID = "id";
+	private static String KEY_SOURCE_ID = "source_id";
+	private static String KEY_URL = "url";
 
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
@@ -66,10 +75,9 @@ public class RegisterActivity extends Activity {
 
 		Bundle bundle = getIntent().getExtras();
 
-		// Set up the login form.
+		// Set up the register form.
 		mNameView = (EditText) findViewById(R.id.name);
-		mNameView.setText(bundle.getString("email").substring(0,
-				bundle.getString("email").indexOf("@")));
+		mNameView.setText(bundle.getString("email").substring(0, bundle.getString("email").indexOf("@")));
 
 		mEmailView = (EditText) findViewById(R.id.email);
 		mEmailView.setText(bundle.getString("email"));
@@ -78,8 +86,9 @@ public class RegisterActivity extends Activity {
 		mPasswordView.setText(bundle.getString("password"));
 
 		mRepeatPasswordView = (EditText) findViewById(R.id.repeat_password);
-		mRepeatPasswordView
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		mRepeatPasswordView.setOnEditorActionListener(
+				new TextView.OnEditorActionListener() {
+
 					@Override
 					public boolean onEditorAction(TextView textView, int id,
 							KeyEvent keyEvent) {
@@ -98,6 +107,7 @@ public class RegisterActivity extends Activity {
 
 		findViewById(R.id.register_button).setOnClickListener(
 				new View.OnClickListener() {
+
 					@Override
 					public void onClick(View view) {
 						attemptLogin();
@@ -137,46 +147,39 @@ public class RegisterActivity extends Activity {
 
 		// Check for a valid password.
 		if (TextUtils.isEmpty(mRepeatPassword)) {
-			mRepeatPasswordView
-					.setError(getString(R.string.error_register_field_required));
+			mRepeatPasswordView.setError(getString(R.string.error_register_field_required));
 			focusView = mRepeatPasswordView;
 			cancel = true;
 		} else if (!mRepeatPassword.equals(mPassword)) {
-			mRepeatPasswordView
-					.setError(getString(R.string.error_register_incorrect_password));
+			mRepeatPasswordView.setError(getString(R.string.error_register_incorrect_password));
 			focusView = mRepeatPasswordView;
 			cancel = true;
 		}
 
 		if (TextUtils.isEmpty(mPassword)) {
-			mPasswordView
-					.setError(getString(R.string.error_register_field_required));
+			mPasswordView.setError(getString(R.string.error_register_field_required));
 			focusView = mPasswordView;
 			cancel = true;
 		} else if (mPassword.length() < 4) {
-			mPasswordView
-					.setError(getString(R.string.error_register_invalid_password));
+			mPasswordView.setError(getString(R.string.error_register_invalid_password));
 			focusView = mPasswordView;
 			cancel = true;
 		}
 
 		// Check for a valid email address.
 		if (TextUtils.isEmpty(mEmail)) {
-			mEmailView
-					.setError(getString(R.string.error_register_field_required));
+			mEmailView.setError(getString(R.string.error_register_field_required));
 			focusView = mEmailView;
 			cancel = true;
 		} else if (!mEmail.contains("@")) {
-			mEmailView
-					.setError(getString(R.string.error_register_invalid_email));
+			mEmailView.setError(getString(R.string.error_register_invalid_email));
 			focusView = mEmailView;
 			cancel = true;
 		}
 
 		// Check for a valid name.
 		if (TextUtils.isEmpty(mName)) {
-			mNameView
-					.setError(getString(R.string.error_register_field_required));
+			mNameView.setError(getString(R.string.error_register_field_required));
 			focusView = mNameView;
 			cancel = true;
 		}
@@ -204,17 +207,16 @@ public class RegisterActivity extends Activity {
 		// for very easy animations. If available, use these APIs to fade-in
 		// the progress spinner.
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			int shortAnimTime = getResources().getInteger(
-					android.R.integer.config_shortAnimTime);
+			int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
 			mLoginStatusView.setVisibility(View.VISIBLE);
 			mLoginStatusView.animate().setDuration(shortAnimTime)
 					.alpha(show ? 1 : 0)
 					.setListener(new AnimatorListenerAdapter() {
+
 						@Override
 						public void onAnimationEnd(Animator animation) {
-							mLoginStatusView.setVisibility(show ? View.VISIBLE
-									: View.GONE);
+							mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
 						}
 					});
 
@@ -222,10 +224,10 @@ public class RegisterActivity extends Activity {
 			mLoginFormView.animate().setDuration(shortAnimTime)
 					.alpha(show ? 0 : 1)
 					.setListener(new AnimatorListenerAdapter() {
+
 						@Override
 						public void onAnimationEnd(Animator animation) {
-							mLoginFormView.setVisibility(show ? View.GONE
-									: View.VISIBLE);
+							mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
 						}
 					});
 		} else {
@@ -240,54 +242,91 @@ public class RegisterActivity extends Activity {
 	 * Represents an asynchronous login/registration task used to authenticate
 	 * the user.
 	 */
-	public class UserLoginTask extends AsyncTask<String, Void, Boolean> {
+	public class UserLoginTask extends AsyncTask<String, Void, JSONObject> {
+
 		@Override
-		protected Boolean doInBackground(String... params) {
+		protected JSONObject doInBackground(String... params) {
 			// TODO: attempt authentication against a network service.
+			JSONObject json = null;
 
-			try {
-				SharedPreferences sharedPref = PreferenceManager
-						.getDefaultSharedPreferences(getApplicationContext());
-				String url = sharedPref.getString(
-						SettingsActivity.KEY_URL_SERVER, "");
-
+			// Verify network access.
+			ConnectionDetector cd = new ConnectionDetector(getApplicationContext());
+			if (cd.isConnectingToInternet()) {
 				UserFunctions userFunction = new UserFunctions();
 
-				JSONObject json = userFunction.registerUser(params[0],
-						params[1], params[2], url);
-				Log.i("JSON", "Register: " + json.toString());
-
-				if (json.getString(KEY_RETURN).equalsIgnoreCase("1")) {
-					return false;
-				}
-
-			} catch (JSONException e) {
-				return false;
+				json = userFunction.registerUser(params[0], params[1], params[2]);
+			} else {
+				Log.e(MainActivity.TAG, "No hay conexion");
+				Toast.makeText(getApplicationContext(), R.string.network_error, Toast.LENGTH_LONG).show();
+				// showDialog(R.string.network_error, R.string.network_error_msg);
 			}
-
 			// TODO: register the new account here.
-			return true;
+			return json;
 		}
 
 		@Override
-		protected void onPostExecute(final Boolean success) {
+		protected void onPostExecute(final JSONObject json) {
 			mAuthTask = null;
 			showProgress(false);
 
-			if (success) {
-				// Launch Main Screen
+			if (json != null) {
+				int success, i, total;
+				UserFunctions userFunction = new UserFunctions();
 
-				Intent main = new Intent(RegisterActivity.this,
-						MainActivity.class);
-				main.putExtra(KEY_NAME, mName);
-				startActivity(main);
-				finish();
+				try {
+					success = json.getInt(KEY_RETURN);
+					if (success == 0) {
+						// Registro correcto
+						// Clear all previous data in database
+						DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+						JSONObject json_aux = json.getJSONObject("user");
+
+						userFunction.logoutUser(getApplicationContext());
+
+						db.addUser(json_aux.getString(KEY_NAME),
+								json_aux.getString(KEY_EMAIL),
+								json_aux.getString(KEY_UID),
+								json_aux.getString(KEY_CREATED_AT));
+
+						JSONArray json_sources = json.getJSONArray("sources");
+						total = json_sources.length();
+						for (i = 0; i < total; i++) {
+							json_aux = (JSONObject) json_sources.get(i);
+							db.addSource(json_aux.getInt(KEY_ID),
+									json_aux.getString(KEY_NAME),
+									json_aux.getString(KEY_URL));
+						}
+
+						JSONArray json_feeds = json.getJSONArray("feeds");
+						total = json_feeds.length();
+						for (i = 0; i < total; i++) {
+							json_aux = (JSONObject) json_feeds.get(i);
+							db.addFeed(json_aux.getInt(KEY_ID),
+									json_aux.getInt(KEY_SOURCE_ID),
+									json_aux.getString(KEY_NAME),
+									json_aux.getString(KEY_URL));
+						}
+						// Launch Main Screen
+						Intent main = new Intent(getApplicationContext(), MainActivity.class);
+						main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(main);
+						finish();
+					} else if (success == 1) {
+						// Error en registro
+						Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+
+					} else if (success == 2) {
+						// Email ya registrado
+						Toast.makeText(getApplicationContext(), "Usuario ya registrado", Toast.LENGTH_LONG).show();
+					}
+				} catch (JSONException e) {
+					Log.e(MainActivity.TAG, "Error JSON");
+				} catch (Exception e) {
+					Log.e(MainActivity.TAG, "Error");
+				}
 			} else {
-				/*
-				 * mPasswordView
-				 * .setError(getString(R.string.error_register_incorrect_password
-				 * )); mPasswordView.requestFocus();
-				 */
+				Toast.makeText(getApplicationContext(), R.string.network_error, Toast.LENGTH_LONG).show();
+				// showDialog(R.string.network_error, R.string.json_error_msg);
 			}
 		}
 
