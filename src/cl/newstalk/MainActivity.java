@@ -54,7 +54,6 @@ public class MainActivity extends Activity implements
 
 	private MainTask mTask = null;
 
-	static final String URL = "/newstalk/rss.xml";
 	// XML node keys
 	public static final String KEY_SONG = "item"; // parent node
 	public static final String KEY_TITLE = "title";
@@ -243,8 +242,8 @@ public class MainActivity extends Activity implements
 					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
 				Log.e(TAG, "This Language is not supported");
 			} else {
-				//btnSpeak.setEnabled(true);
-				//speakOut("");
+				// btnSpeak.setEnabled(true);
+				// speakOut("");
 			}
 		} else {
 			Log.e(TAG, "Initilization Failed!");
@@ -255,19 +254,20 @@ public class MainActivity extends Activity implements
 		if (tts != null) {
 			tts.stop();
 		}
-		if(!speaking.equalsIgnoreCase(title)) {
+		if (!speaking.equalsIgnoreCase(title)) {
 			speaking = title;
 			tts.speak(title, TextToSpeech.QUEUE_FLUSH, null);
-			
+
 			SharedPreferences sharedPref = PreferenceManager
 					.getDefaultSharedPreferences(getApplicationContext());
 
 			boolean url = sharedPref.getBoolean("speak_description", false);
-			if(url) {
-				while(tts.isSpeaking());
+			if (url) {
+				while (tts.isSpeaking())
+					;
 				tts.speak(description, TextToSpeech.QUEUE_FLUSH, null);
 			}
-		}else {
+		} else {
 			speaking = "";
 		}
 	}
@@ -309,23 +309,23 @@ public class MainActivity extends Activity implements
 				// map.put(KEY_ID, parser.getValue(e, KEY_ID));
 				map.put(KEY_TITLE, parser.getValue(e, KEY_TITLE));
 				String desc = parser.getValue(e, KEY_ARTIST);
-								
+
 				String img = null;
 				if (desc.indexOf("/>") > 0) {
 					img = desc.substring(0, desc.indexOf("/>"));
 					img = img.replaceFirst("(.*)src=\"", "");
 					img = img.replaceFirst("\"(.*)", "");
 				}
-				
+
 				String artist = Html.fromHtml(desc).toString();
 				if (img != null)
 					artist = Html.fromHtml(desc).toString().substring(1).trim();
 
-				//artist = UserFunctions.replace(artist);
-				
+				// artist = UserFunctions.replace(artist);
+
 				map.put(KEY_ARTIST, artist);
 				map.put(KEY_DURATION, parser.getValue(e, KEY_DURATION));
-				if(img != null)
+				if (img != null)
 					map.put(KEY_THUMB_URL, img);
 
 				// adding HashList to ArrayList
@@ -353,9 +353,9 @@ public class MainActivity extends Activity implements
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
 					HashMap<String, String> aa = (HashMap<String, String>) list.getAdapter().getItem(position);
-					Log.d(TAG,aa.get("description"));
-					
-					speakOut(aa.get("title"),aa.get("description"));
+					Log.d(TAG, aa.get("description"));
+
+					speakOut(aa.get("title"), aa.get("description"));
 				}
 			});
 		}
