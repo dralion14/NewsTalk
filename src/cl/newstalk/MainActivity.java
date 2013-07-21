@@ -140,14 +140,6 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
 				// finish();
 
 				return true;
-			case R.id.action_sources:
-				Intent sources = new Intent(getApplicationContext(), SourceActivity.class);
-				// preference .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(sources);
-				// Closing main screen
-				// finish();
-
-				return true;
 			default:
 				return false;
 		}

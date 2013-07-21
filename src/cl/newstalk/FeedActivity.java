@@ -2,45 +2,54 @@ package cl.newstalk;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteCursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
+import android.widget.CheckBox;
+import android.widget.ExpandableListView;
+import android.widget.SimpleCursorTreeAdapter;
+import android.widget.TextView;
 import cl.newstalk.library.DatabaseHandler;
-import cl.newstalk.library.ListViewAdapter;
 
 public class FeedActivity extends Activity {
 
-	private ListView listFeeds;
+	// This is the Adapter being used to display the list's data
 	private DatabaseHandler db;
-	private ListViewAdapter cursorAdapter;
+
+	private ExpandableListView expListFeeds;
+
+	private Cursor getFeeds;
+	private Cursor getAllSources;
+	MyExpandableListAdapter cursorTreeAdapter;
+
+	LayoutInflater mInflator;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_feed);
 
-		listFeeds = (ListView) findViewById(R.id.listFeeds);
+		expListFeeds = (ExpandableListView) findViewById(R.id.expandableListFeeds);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
 			ActionBar ab = getActionBar();
 			ab.setDisplayHomeAsUpEnabled(true);
 		}
+		mInflator = LayoutInflater.from(getApplicationContext());
 
 		getFeeds();
 
-		registerForContextMenu(listFeeds);
+		registerForContextMenu(expListFeeds);
 	}
 
 	@Override
@@ -58,27 +67,35 @@ public class FeedActivity extends Activity {
 		try {
 			db = new DatabaseHandler(this);
 
-			Cursor cursor = db.getItemsListView(DatabaseHandler.TABLE_FEED);
+			getAllSources = db.getItemsListView(DatabaseHandler.TABLE_SOURCE);
 
-			String[] from = new String[] { DatabaseHandler.KEY_NAME, DatabaseHandler.KEY_SOURCE_ID };
+			cursorTreeAdapter = new MyExpandableListAdapter(
+					getApplicationContext(),
+					getAllSources,
+					R.layout.row_list_sources,
+					R.layout.row_list_sources,
+					new String[] { "name", "_id" },
+					new int[] { R.id.source_name },
+					R.layout.row_list_feeds,
+					R.layout.row_list_feeds,
+					new String[] { "name", "active", "source_id", "_id" },
+					new int[] { R.id.feed_name });
 
-			int[] to = new int[] { R.id.feed_name, R.id.feed_source_name };
+			expListFeeds.setAdapter(cursorTreeAdapter);
 
-			cursorAdapter = new ListViewAdapter(this, R.layout.row_list_feeds, cursor, from, to);
-
-			listFeeds.setAdapter(cursorAdapter);
-
-			// Click event for single list row
-			listFeeds.setOnItemClickListener(new OnItemClickListener() {
+			expListFeeds.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 
 				@Override
-				public void onItemClick(AdapterView<?> l, View v, int position, long id) {
-					// Do something when a list item is clicked
-					SQLiteCursor cursor = (SQLiteCursor) l.getItemAtPosition(position);
+				public boolean onChildClick(ExpandableListView parent,
+						View v, int groupPosition, int childPosition,
+						long id) {
+					if (groupPosition == 0 && childPosition == 0) {
+
+					}
 
 					SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 					SharedPreferences.Editor editor = settings.edit();
-					editor.putString("actual_feed", cursor.getString(cursor.getColumnIndex("url")));
+					editor.putString("actual_feed", cursorTreeAdapter.getFromChild(groupPosition, childPosition, "url"));
 					// Commit the edits!
 					editor.commit();
 					// Reemplazar lo siguiente por un SlidingView:
@@ -86,6 +103,8 @@ public class FeedActivity extends Activity {
 					main.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(main);
 					finish();
+
+					return false;
 				}
 			});
 
@@ -97,7 +116,7 @@ public class FeedActivity extends Activity {
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		getFeeds();
 	}
@@ -121,6 +140,82 @@ public class FeedActivity extends Activity {
 			default:
 				return false;
 		}
+	}
+
+	public class MyExpandableListAdapter extends SimpleCursorTreeAdapter {
+
+		public MyExpandableListAdapter(Context context, Cursor cursor, int collapsedGroupLayout, int expandedGroupLayout,
+				String[] groupFrom, int[] groupTo, int childLayout, int lastChildLayout, String[] childFrom, int[] childTo) {
+			super(context, cursor, collapsedGroupLayout, expandedGroupLayout, groupFrom, groupTo, childLayout, lastChildLayout,
+									 childFrom,
+									 childTo);									 
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		protected Cursor getChildrenCursor(Cursor groupCursor) {
+			getFeeds = db.getItemsListView(DatabaseHandler.TABLE_FEED, groupCursor.getString(groupCursor.getColumnIndex("_id")));
+
+			return getFeeds;
+		}
+
+		public String getFromChild(int groupPosition, int childPosition, String column) {
+			int columnIndex = this.getChild(groupPosition, childPosition).getColumnIndex(column);
+
+			return this.getChild(groupPosition, childPosition).getString(columnIndex);
+		}
+
+		@Override
+		protected void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
+			// TODO Auto-generated method stub
+			TextView tvA = (TextView) view.findViewById(R.id.feed_name);
+			tvA.setText(cursor.getString(cursor.getColumnIndex("name")));
+			CheckBox cb = (CheckBox) view.findViewById(R.id.feed_active);
+			if (cursor.getString(cursor.getColumnIndex("active")).equals("0")) {
+				cb.setChecked(false);
+			} else {
+				cb.setChecked(true);
+			}
+		}
+/*
+ * Sirve para CursorTreeAdapter
+		@Override
+		protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+			// TODO Auto-generated method stub
+			TextView tvA = (TextView) view.findViewById(R.id.source_name);
+			tvA.setText(cursor.getString(cursor.getColumnIndex("name")));
+		}
+
+		@Override
+		protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			View mView = mInflator.inflate(R.layout.row_list_feeds, null);
+
+			final TextView tvChild = (TextView) mView.findViewById(R.id.feed_name);
+
+			tvChild.setText(cursor.getString(cursor.getColumnIndex("name")));
+
+			CheckBox chb = (CheckBox) mView.findViewById(R.id.feed_active);
+			if (cursor.getString(cursor.getColumnIndex("active")).equals("0")) {
+				chb.setChecked(false);
+			} else {
+				chb.setChecked(true);
+			}
+
+			return mView;
+		}
+
+		@Override
+		protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			View mView = mInflator.inflate(
+					R.layout.row_list_sources, null);
+			TextView tvGrp = (TextView) mView.findViewById(R.id.source_name);
+			tvGrp.setText(cursor.getString(cursor.getColumnIndex("name")));
+
+			return mView;
+		}
+*/
 	}
 
 }

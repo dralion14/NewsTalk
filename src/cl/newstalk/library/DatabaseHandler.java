@@ -279,7 +279,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		if (cursor != null) {
 			cursor.moveToFirst();
 		}
+		
+		
+		return cursor;
+	}
+	
+	public Cursor getItemsListView(String table, String id) {
+		SQLiteDatabase db = getReadableDatabase();
+		String query = "SELECT " + KEY_ID + ", " + KEY_SOURCE_ID + ", " + KEY_NAME + ", " + KEY_URL + ", "
+					+ KEY_ACTIVE + " FROM " + TABLE_FEED + " WHERE source_id = "+ id;
 
+		Cursor cursor = db.rawQuery(query, null);
+
+		if (cursor != null) {
+			cursor.moveToFirst();
+		}		
+		db.close();
+		
 		return cursor;
 	}
 
@@ -293,10 +309,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		}
 		db.close();
 	}
-	
+
 	public String getURLFeed(String id) {
 		HashMap<String, String> user = new HashMap<String, String>();
-		String selectQuery = "SELECT url FROM " + TABLE_FEED + " WHERE _id="+id;
+		String selectQuery = "SELECT url FROM " + TABLE_FEED + " WHERE _id=" + id;
 
 		SQLiteDatabase db = this.getReadableDatabase();
 		Cursor cursor = db.rawQuery(selectQuery, null);

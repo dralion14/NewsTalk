@@ -174,7 +174,7 @@ public class LoginActivity extends Activity {
 			focusView = mEmailView;
 			cancel = true;
 		}
-
+cancel = false;
 		if (cancel) {
 			// There was an error; don't attempt login and focus the first
 			// form field with an error.
@@ -187,7 +187,8 @@ public class LoginActivity extends Activity {
 				mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
 				showProgress(true);
 				mAuthTask = new UserLoginTask();
-				mAuthTask.execute(mEmail, mPassword);
+				//mAuthTask.execute(mEmail, mPassword);
+				mAuthTask.execute("dralion@newstalk.cl", "dralion");
 			} else {
 				Log.e(MainActivity.TAG, "No hay conexion");
 				Toast.makeText(getApplicationContext(), R.string.network_error, Toast.LENGTH_LONG).show();

@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">NewsTalk</string>
-    <string name="action_sources">Fuentes</string>
     <string name="action_feeds">Canales RSS</string>
     <string name="action_settings">Configuración</string>
     <string name="action_logout">Cerrar Sesión</string>
@@ -16,18 +15,19 @@
     <string name="prefs_summ_category_one">Url del servidor</string>
     <string name="prefs_category_two">Idioma</string>
     <string name="prefs_summ_category_two">Idioma de la aplicación</string>
-    <string name="title_activity_source">Fuentes</string>
-    <string name="title_activity_feed">Canales RSS</string>    
-    
+    <string name="title_activity_feed">Canales RSS</string>
     <string name="default_url_server">192.168.0.106</string>
     <string name="actual_feed"></string>
     <string name="speak_description">false</string>
-    
+
     <string-array name="activities_array">
         <item>Fuentes</item>
         <item>Canales RSS</item>
         <item>Cuenta</item>
         <item>Salir</item>
     </string-array>
+
+    <string name="title_activity_test">TestActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>
