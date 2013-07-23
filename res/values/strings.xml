@@ -19,12 +19,18 @@
     <string name="default_url_server">192.168.0.106</string>
     <string name="actual_feed"></string>
     <string name="speak_description">false</string>
+    <string name="url_title">Ir a sitio web</string>
+    <string name="url_msg">Ir a sitio web</string>
 
     <string-array name="activities_array">
         <item>Fuentes</item>
         <item>Canales RSS</item>
         <item>Cuenta</item>
         <item>Salir</item>
+    </string-array>
+    
+    <string-array name="sources_array">
+        <item>Abrir URL</item>
     </string-array>
 
     <string name="title_activity_test">TestActivity</string>

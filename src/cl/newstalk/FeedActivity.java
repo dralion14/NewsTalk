@@ -2,10 +2,12 @@ package cl.newstalk;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -14,11 +16,13 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import cl.newstalk.library.DatabaseHandler;
+import cl.newstalk.library.FragmentAlertDialog;
 
 public class FeedActivity extends Activity {
 
@@ -32,6 +36,8 @@ public class FeedActivity extends Activity {
 	MyExpandableListAdapter cursorTreeAdapter;
 
 	LayoutInflater mInflator;
+
+	String url = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +67,23 @@ public class FeedActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		;
+	}
+
+	void showDialog(int title, int msg) {
+		DialogFragment newFragment = FragmentAlertDialog.newInstance(R.string.title_activity_feed, title, msg);
+		newFragment.show(getFragmentManager(), "dialog");
+	}
+
+	public void doPositiveClick() {
+		if (url != null) {
+			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+			startActivity(browserIntent);
+		}
+	}
+
+	public void doNegativeClick() {
+		// Do stuff here.
+		Log.i(MainActivity.TAG, "Negative click!");
 	}
 
 	private void getFeeds() {
@@ -108,6 +131,39 @@ public class FeedActivity extends Activity {
 				}
 			});
 
+			expListFeeds.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+				@Override
+				public boolean onItemLongClick(AdapterView<?> arg0, View v, int index, long arg3) {
+					// TODO Auto-generated method stub
+					Cursor item = (Cursor) expListFeeds.getItemAtPosition(index);
+					String source = item.getString(item.getColumnIndex("name"));
+					url = item.getString(item.getColumnIndex("url"));
+
+					if (!url.startsWith("http://") && !url.startsWith("https://"))
+						url = "http://" + url;
+					String msg = "Visitar página de \"" + source + "\"";
+
+					showDialog(R.string.url_title, R.string.url_msg);
+
+					return true;
+				}
+			});
+
+			// Los dos metodos siguientes son para mantenerlos siempre expandidos
+			expListFeeds.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+
+				@Override
+				public void onGroupCollapse(int groupPosition) {
+					// TODO Auto-generated method stub
+					expListFeeds.expandGroup(groupPosition);
+				}
+			});
+
+			for (int i = 0; i < getAllSources.getCount(); i++) {
+				expListFeeds.expandGroup(i);
+			}
+
 		} catch (Exception e) {
 			Log.d(MainActivity.TAG, "El mensaje de error es: " + e.getMessage());
 		} finally {
@@ -147,8 +203,8 @@ public class FeedActivity extends Activity {
 		public MyExpandableListAdapter(Context context, Cursor cursor, int collapsedGroupLayout, int expandedGroupLayout,
 				String[] groupFrom, int[] groupTo, int childLayout, int lastChildLayout, String[] childFrom, int[] childTo) {
 			super(context, cursor, collapsedGroupLayout, expandedGroupLayout, groupFrom, groupTo, childLayout, lastChildLayout,
-									 childFrom,
-									 childTo);									 
+					childFrom,
+					childTo);
 			// TODO Auto-generated constructor stub
 		}
 
@@ -177,45 +233,46 @@ public class FeedActivity extends Activity {
 				cb.setChecked(true);
 			}
 		}
-/*
- * Sirve para CursorTreeAdapter
-		@Override
-		protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
-			// TODO Auto-generated method stub
-			TextView tvA = (TextView) view.findViewById(R.id.source_name);
-			tvA.setText(cursor.getString(cursor.getColumnIndex("name")));
-		}
-
-		@Override
-		protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			View mView = mInflator.inflate(R.layout.row_list_feeds, null);
-
-			final TextView tvChild = (TextView) mView.findViewById(R.id.feed_name);
-
-			tvChild.setText(cursor.getString(cursor.getColumnIndex("name")));
-
-			CheckBox chb = (CheckBox) mView.findViewById(R.id.feed_active);
-			if (cursor.getString(cursor.getColumnIndex("active")).equals("0")) {
-				chb.setChecked(false);
-			} else {
-				chb.setChecked(true);
-			}
-
-			return mView;
-		}
-
-		@Override
-		protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
-			// TODO Auto-generated method stub
-			View mView = mInflator.inflate(
-					R.layout.row_list_sources, null);
-			TextView tvGrp = (TextView) mView.findViewById(R.id.source_name);
-			tvGrp.setText(cursor.getString(cursor.getColumnIndex("name")));
-
-			return mView;
-		}
-*/
+		/*
+		 * Sirve para CursorTreeAdapter
+		 * 
+		 * @Override
+		 * protected void bindGroupView(View view, Context context, Cursor cursor, boolean isExpanded) {
+		 * // TODO Auto-generated method stub
+		 * TextView tvA = (TextView) view.findViewById(R.id.source_name);
+		 * tvA.setText(cursor.getString(cursor.getColumnIndex("name")));
+		 * }
+		 * 
+		 * @Override
+		 * protected View newChildView(Context context, Cursor cursor, boolean isLastChild, ViewGroup parent) {
+		 * // TODO Auto-generated method stub
+		 * View mView = mInflator.inflate(R.layout.row_list_feeds, null);
+		 * 
+		 * final TextView tvChild = (TextView) mView.findViewById(R.id.feed_name);
+		 * 
+		 * tvChild.setText(cursor.getString(cursor.getColumnIndex("name")));
+		 * 
+		 * CheckBox chb = (CheckBox) mView.findViewById(R.id.feed_active);
+		 * if (cursor.getString(cursor.getColumnIndex("active")).equals("0")) {
+		 * chb.setChecked(false);
+		 * } else {
+		 * chb.setChecked(true);
+		 * }
+		 * 
+		 * return mView;
+		 * }
+		 * 
+		 * @Override
+		 * protected View newGroupView(Context context, Cursor cursor, boolean isExpanded, ViewGroup parent) {
+		 * // TODO Auto-generated method stub
+		 * View mView = mInflator.inflate(
+		 * R.layout.row_list_sources, null);
+		 * TextView tvGrp = (TextView) mView.findViewById(R.id.source_name);
+		 * tvGrp.setText(cursor.getString(cursor.getColumnIndex("name")));
+		 * 
+		 * return mView;
+		 * }
+		 */
 	}
 
 }

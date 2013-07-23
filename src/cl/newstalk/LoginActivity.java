@@ -356,7 +356,7 @@ cancel = false;
 
 	// BEGIN_INCLUDE(activity)
 	void showDialog(int title, int msg) {
-		DialogFragment newFragment = FragmentAlertDialog.newInstance(title, msg);
+		DialogFragment newFragment = FragmentAlertDialog.newInstance(R.string.title_activity_login, title, msg);
 		newFragment.show(getFragmentManager(), "dialog");
 	}
 
